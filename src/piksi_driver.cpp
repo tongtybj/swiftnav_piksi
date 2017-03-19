@@ -29,7 +29,7 @@ namespace swiftnav_piksi
 		max_llh_rate( 50.0 ),
 		min_rtk_rate( 0.5 ),
 		max_rtk_rate( 50.0 ),
-		min_heartbeat_rate( 0.5 ),
+		min_heartbeat_rate( 0.1 ),
 		max_heartbeat_rate( 50.0 ),
 
 		llh_pub_freq( diagnostic_updater::FrequencyStatusParam(
@@ -317,14 +317,14 @@ namespace swiftnav_piksi
         float v_covariance = 0.0e3;
 
         // populate the pose covariance matrix if we have a good fix
-        if ( 1 == sbp_ned.flags && 4 < sbp_ned.n_sats)
+        if ( 4 == sbp_ned.flags && 4 < sbp_ned.n_sats)
         {
             // FIXME: h_accuracy doesn't work yet, so use hard-coded 4cm
             // until it does
-            //h_covariance = (sbp_ned.h_accuracy * sbp_ned.h_accuracy) / 1.0e-6;
-            //v_covariance = (sbp_ned.v_accuracy * sbp_ned.v_accuracy) / 1.0e-6;
-            h_covariance = driver->rtk_h_accuracy * driver->rtk_h_accuracy;
-            v_covariance = driver->rtk_h_accuracy * driver->rtk_h_accuracy;
+            h_covariance = (sbp_ned.h_accuracy * sbp_ned.h_accuracy) / 1.0e-6;
+            v_covariance = (sbp_ned.v_accuracy * sbp_ned.v_accuracy) / 1.0e-6;
+            //h_covariance = driver->rtk_h_accuracy * driver->rtk_h_accuracy;
+            //v_covariance = driver->rtk_h_accuracy * driver->rtk_h_accuracy;
         }
 
         // Pose x/y/z covariance is whatever we decided h & v covariance is
@@ -367,8 +367,6 @@ namespace swiftnav_piksi
 		driver->rtk_north = rtk_odom_msg->pose.pose.position.x;
 		driver->rtk_east = rtk_odom_msg->pose.pose.position.y;
         driver->rtk_height = rtk_odom_msg->pose.pose.position.z;
-        // FIXME: rtk.h_accuracy doesn't work yet
-        //driver->rtk_h_accuracy = rtk.h_accuracy / 1000.0;
 
 		return;
 	}
@@ -480,7 +478,7 @@ namespace swiftnav_piksi
 			stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, 
                             "RTK Satellite fix invalid: too few satellites in view" );
         }
-        else if( rtk_status != 1 )
+        else if( rtk_status != 4 )
         {
 			stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, 
                             "No GPS RTK fix" );
@@ -494,7 +492,7 @@ namespace swiftnav_piksi
 
         stat.add( "Heartbeat status (0 = good)", heartbeat_flags);
         stat.add( "Number of satellites used in GPS RTK solution", num_rtk_satellites );
-        stat.add( "GPS RTK solution status (1 = good)", rtk_status );
+        stat.add( "GPS RTK solution status (4 = good)", rtk_status );
         stat.add( "GPS RTK meters north", rtk_north );
         stat.add( "GPS RTK meters east", rtk_east );
         stat.add( "GPS RTK height difference (m)", rtk_height );

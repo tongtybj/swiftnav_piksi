@@ -164,7 +164,7 @@ int piksi_open( const char *port )
 
 	struct termios options;
 	cfmakeraw( &options );
-	if( cfsetispeed( &options, B1000000 ) < 0 )
+	if( cfsetispeed( &options, B115200 ) < 0 )
 	{
 		close( fd );
 		return PIKSI_ERROR_IO;
@@ -196,7 +196,7 @@ int piksi_open( const char *port )
 
 	memcpy( piksi_list[mydev]->port, port, strlen( port ) + 1 );
 	piksi_list[mydev]->fd = fd;
-	piksi_list[mydev]->baud = baud2term( 1000000 );
+	piksi_list[mydev]->baud = baud2term( 115200 );
 
 	return mydev;
 
