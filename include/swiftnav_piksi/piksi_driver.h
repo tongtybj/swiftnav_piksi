@@ -158,6 +158,7 @@ namespace swiftnav_piksi
         double rtk_vel_north;
         double rtk_vel_east;
         double rtk_vel_up;
+        unsigned int rtk_vel_status;
 
 		ros::Rate spin_rate;
 		boost::thread spin_thread;

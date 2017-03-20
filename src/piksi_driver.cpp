@@ -348,12 +348,22 @@ namespace swiftnav_piksi
         rtk_odom_msg->twist.twist.angular.z = 0;
 
         // set up the Twist covariance matrix
-        // FIXME: I don't know what the covariance of linear velocity should be.
-        // 12/19 asked on swiftnav google group
-        // GPS doesn't provide rotationl velocity
-        rtk_odom_msg->twist.covariance[0]  = 1.0e3;   // x velocity = 0, 0 in the 6x6 cov matrix
-        rtk_odom_msg->twist.covariance[7]  = 1.0e3;   // y velocity = 1, 1
-        rtk_odom_msg->twist.covariance[14] = 1.0e3;  // z velocity = 2, 2
+        // New in piksi multi: velocity valid flag
+        if (0 == (driver->rtk_vel_status & 0x3))
+        {
+            // velocity invalid
+            rtk_odom_msg->twist.covariance[0]  = 1.0e3;   // x velocity = 0, 0 in the 6x6 cov matrix
+            rtk_odom_msg->twist.covariance[7]  = 1.0e3;   // y velocity = 1, 1
+            rtk_odom_msg->twist.covariance[14] = 1.0e3;   // z velocity = 2, 2
+        }
+        else
+        {
+            // velocity valid - use some made-up numbers
+            rtk_odom_msg->twist.covariance[0]  = 1.0;   // x velocity = 0, 0 in the 6x6 cov matrix
+            rtk_odom_msg->twist.covariance[7]  = 1.0;   // y velocity = 1, 1
+            rtk_odom_msg->twist.covariance[14] = 1.0;   // z velocity = 2, 2
+        }
+        // GPS doesn't provide rotational velocity so give it a bit covariance
         rtk_odom_msg->twist.covariance[21] = 1.0e3;  // x rotational velocity = 3, 3
         rtk_odom_msg->twist.covariance[28] = 1.0e3;  // y rotational velocity = 4, 4
         rtk_odom_msg->twist.covariance[35] = 1.0e3;  // z rotational velocity = 5, 5
@@ -416,6 +426,7 @@ namespace swiftnav_piksi
         driver->rtk_vel_north = sbp_vel.n/1000.0;
         driver->rtk_vel_east = sbp_vel.e/1000.0;
         driver->rtk_vel_up = -sbp_vel.d/1000.0;
+        driver->rtk_vel_status = sbp_vel.flags;
 
 		return;
 	}
@@ -500,6 +511,7 @@ namespace swiftnav_piksi
         stat.add( "GPS RTK velocity north", rtk_vel_north );
         stat.add( "GPS RTK velocity east", rtk_vel_east );
         stat.add( "GPS RTK velocity up", rtk_vel_up );
+        stat.add( "GPS RTK velocity flags", rtk_vel_status );
         stat.add( "Number of satellites used for lat/lon", num_llh_satellites);
         stat.add( "GPS lat/lon solution status", llh_status );
         stat.add( "GPS latitude", llh_lat );
