@@ -1,6 +1,8 @@
 <launch>
-   <node pkg="swiftnav_piksi" type="piksi_node" name="piksi_node" output="screen">
-     <param name="port" value="/dev/ttyUSB0" />
+  <arg name="port" default="/dev/ttyUSB0" />
+  
+  <node pkg="swiftnav_piksi" type="piksi_node" name="piksi_node" output="screen">
+     <param name="port" value="$(arg port)" />
    </node>
    
    <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
